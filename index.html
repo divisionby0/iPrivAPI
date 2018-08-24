@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Insta Like app</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="application/javascript" src="js/lib/collections.min.js"></script>
+    <script type="application/javascript" src="js/lib/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container" id="loginContainer">
+        <div class="row">
+            <div class="col-md-3">
+                <h1>insta login</h1>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="userName" name="userName">
+            </div>
+            <div class="col-md-3">
+                <input type="password" class="form-control" id="userPass" name="userPass">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" id="instaLoginButton" class="btn btn-default">Login to insta</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="selfFollowersContainer">
+        <div class="row">
+            <button id="getFollowersButton" style="display: none;" class="btn btn-default">Get followers</button>
+        </div>
+        <div class="row">
+            <div id="totalSelfFollowersContainer"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="container" id="selfFollowers"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script type="application/javascript" src="js/div0/followers/FollowerListRenderer.js"></script>
+<script type="application/javascript" src="js/div0/followers/FollowersView.js"></script>
+<script type="application/javascript" src="js/MyApplication.js"></script>
+
+<script type="application/javascript">
+    document.addEventListener("DOMContentLoaded", ready);
+    function ready(){
+        new MyApplication();
+    }
+</script>
+</html>
