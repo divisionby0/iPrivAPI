@@ -1,4 +1,6 @@
 ///<reference path="div0/followers/FollowersView.ts"/>
+///<reference path="div0/like/LikeRequestCollectionListView.ts"/>
+///<reference path="div0/like/service/MassLikeService.ts"/>
 var MyApplication = (function () {
     function MyApplication() {
         var _this = this;
@@ -8,8 +10,10 @@ var MyApplication = (function () {
         this.accountId = 0;
         this.j = jQuery.noConflict();
         console.log("Im Application j=", this.j);
+        this.massLikeService = new MassLikeService(this.server);
         var loginButton = this.j("#instaLoginButton");
         loginButton.click(function () { return _this.onLoginButtonClicked(); });
+        EventBus.addEventListener(LikeEvent.MASS_LIKE_REQUEST, function (data) { return _this.onMassLikeRequest(data); });
     }
     MyApplication.prototype.onLoginButtonClicked = function () {
         var _this = this;
@@ -47,6 +51,7 @@ var MyApplication = (function () {
     MyApplication.prototype.onGetFollowersResponse = function (response) {
         console.log("onGetFollowersResponse:", response);
         new FollowersView(this.j("#selfFollowers"), response.data);
+        new LikeRequestCollectionListView();
     };
     MyApplication.prototype.onGetFollowersError = function (error) {
         console.error("onGetFollowersError:", error);
@@ -77,6 +82,9 @@ var MyApplication = (function () {
     };
     MyApplication.prototype.hideLoginContainer = function () {
         this.j("#loginContainer").hide();
+    };
+    MyApplication.prototype.onMassLikeRequest = function (data) {
+        this.massLikeService.createRequest(data);
     };
     return MyApplication;
 }());

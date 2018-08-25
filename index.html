@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script type="application/javascript" src="js/lib/collections.min.js"></script>
+    <script type="application/javascript" src="js/lib/collections/Map.js"></script>
+    <script type="application/javascript" src="js/lib/collections/List.js"></script>
+    <script type="application/javascript" src="js/lib/collections/iterators/ListIterator.js"></script>
+    <script type="application/javascript" src="js/lib/collections/iterators/MapIterator.js"></script>
+    <script type="application/javascript" src="js/lib/events/EventBus.js"></script>
     <script type="application/javascript" src="js/lib/bootstrap.min.js"></script>
 </head>
 <body>
@@ -37,14 +41,26 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div class="container" id="selfFollowers"></div>
+                <div class="container followersList" id="selfFollowers"></div>
+            </div>
+            <div class="col-md-6" id="addToLikeContainer" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6" id="addToLikeCollectionListHeader"></div>
+                    <div class="col-md-6"><button id="createMassLikeRequestButton" class="btn-primary" style="display:none;">Create mass like</button></div>
+                </div>
+                <div class="container followersList" id="addToLikeCollectionContainer"></div>
             </div>
         </div>
     </div>
-
 </body>
+
+<script type="application/javascript" src="js/div0/followers/events/FollowerEvent.js"></script>
 <script type="application/javascript" src="js/div0/followers/FollowerListRenderer.js"></script>
 <script type="application/javascript" src="js/div0/followers/FollowersView.js"></script>
+<script type="application/javascript" src="js/div0/like/LikeRequestCollectionListView.js"></script>
+<script type="application/javascript" src="js/div0/like/LikeListRenderer.js"></script>
+<script type="application/javascript" src="js/div0/like/LikeEvent.js"></script>
+<script type="application/javascript" src="js/div0/like/service/MassLikeService.js"></script>
 <script type="application/javascript" src="js/MyApplication.js"></script>
 
 <script type="application/javascript">

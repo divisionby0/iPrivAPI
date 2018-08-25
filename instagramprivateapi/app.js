@@ -10,19 +10,8 @@ _scope.instaGetFollowersService = null;
 var selfUser;
 _scope.getAccountFollowers = null;
 
-var selfAccountId;
-var totalAccounts;
-var accountCounter;
-var currentAccount;
-var accountToSearchUrl;
-
-var accountToLikeId;
-var mediaCollection;
-var totalMedia = 0;
-var mediaCounter = 0;
 var currentSession;
-var currentMedia;
-var mediaFeed;
+
 
 var createError = require('http-errors');
 var express = require('express');
@@ -33,10 +22,9 @@ var logger = require('morgan');
 var _ = require('lodash');
 var Promise = require('bluebird');
 var cors = require('cors');
-var list = require('./div0/lib/collections/List');
-var map = require('./div0/lib/collections/Map');
+
 var getFollowers = require('./div0/followers/GetAccountFollowers');
-//var getFollowersCount = require('./div0/followers/GetFollowersCount');
+var massLikingTask = require('./div0/like/MassLikingTask');
 
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
@@ -47,8 +35,6 @@ var mediaCounterIncrements = [1,2];
 
 //var additionalAccounts = ["kirill.zhilkin", "kristina.sharipova22", "bionsetoo", "romanchuk69katrin", "anna_karat", "rabbitpark_", "dtcl1_1", "olgafilini", "garmoniya.feo", "logika_feo", "vikulichka_se", "evgeniyashuyts", "moroz91.ru", "aleksandrazoz", "annaguk2304", "muccuc_maria", "shefernatalia", "tamara_kuz", "cynep_mama", "mariavtoford", "irinaboikokudakova", "lizzflx", "alina__kalandadze", "alekseevaliubov1988", "marlenusy", "zuzernova", "lena_tolmacheva14", "klimaver", "tanya_kuzminaa_", "michael_icon", "katyshaa_25", "svetorana", "litekate", "ermaklena86", "dariia.meow", "gorskaya_margarita29", "soshnikova1810", "tasya_01.08", "natashabylgakova1981", "ilmira.bolotyan", "annapinchuk1", "victoria.trishina", "lena_tolmacheva14", "natanext", "mama_natascha", "olesya_black_olesya", "luchistui_pirogok","nysha.p", "shutterstruck", "belofoto", "anusha_bon", "mis_ekaterina_velikaya", "sensory_mom", "anna_pikalovafit", "zirenka", "aquapark_koktebel", "konsetulechka", "fedenkomila", "feodosiya_news", "ekaterina.goncharova", "ssvet_lana_s", "lesik100590", "lina_96_01", "irinavladimirovna_______", "avershina90", "svetlanaminashova77", "gorelova.elen", "natalya_domarova", "katekrym", "alexandrashindina", "anastasia_ai_da_olegovna", "tri_kota_feo", "tatyana_strelcova", "milenanew32", "evgenya93drobot", "chitalochka_feo", "__jane.art__", "aktyusha", "krim_otdih"];
 
-
-
 _scope.app = express();
 
 var user = require('./div0/user/user');
@@ -56,6 +42,7 @@ var user = require('./div0/user/user');
 // services
 var loginService = require('./div0/service/api/InstaLoginService');
 var getFollowersService = require('./div0/service/api/InstaGetFollowersService');
+var _massLikeService = require('./div0/service/api/InstaMassLikingService');
 
 var loginUser = require('./div0/user/loginUser');
 
@@ -79,7 +66,7 @@ _scope.app.use(cors({origin: 'http://instagramprivateapi'}));
 // create services
 instaLoginService = new loginService.InstaLoginService(_scope.app, eventEmitter);
 _scope.instaGetFollowersService = new getFollowersService.InstaGetFollowersService(_scope.app, eventEmitter);
-
+_scope.massLikeService = new _massLikeService.InstaMassLikingService(_scope.app, eventEmitter);
 
 // catch 404 and forward to error handler
 _scope.app.use(function(req, res, next) {
@@ -119,187 +106,9 @@ this.onFollowersLoadComplete = function(data){
     _scope.instaGetFollowersService.sendCompleteResponse(accountFollowers);
 };
 
-this.selectNextAccount = function(){
-    accountCounter+=1;
-    currentAccount = accountsCollection[accountCounter];
-    console.log("Liking account "+accountCounter+" / "+accountsCollection.length);
-    console.log("selecting account "+currentAccount);
-
-    Client.Account.searchForUser(currentSession, currentAccount).then(function(account){
-        console.log("account selected");
-        var accountId = account._params.id;
-        console.log("ID=",accountId);
-        console.log("account:",account);
-
-        //_scope.createMediaFeed(accountId);
-    })
-        .catch(function(error){
-            console.error("Search user "+currentAccount+" ERROR: ",error);
-            /*
-            var timeoutInterval = _scope.createInterval();
-            console.log("waiting "+timeoutInterval+" ms...");
-            setTimeout(_scope.onAccountComplete, timeoutInterval);
-            */
-        })
-};
-
-this.hasNextAccount = function(){
-    var nextAccountIndex = accountCounter + 1;
-    if(nextAccountIndex < totalAccounts){
-        return true;
-    }
-    else{
-        return false;
-    }
-};
-
-this.createLikeOnMedia = function(){
-    var mediaId = currentMedia._params.id;
-    var mediaUrl = currentMedia._params.webLink;
-
-    console.log("creating LIKE on media "+mediaId);
-
-    new Client.Request(currentSession)
-        .setMethod('POST')
-        .setResource('like', {id: mediaId})
-        .generateUUID()
-        .setData({
-            media_id: mediaId,
-            src: "profile"
-        })
-        .signPayload()
-        .send()
-        .then(function(data) {
-            console.log("Like media "+mediaUrl+" complete");
-            _scope.waitAfterLikeOperation();
-        })
-        .catch(function(error){
-            console.error("Like media "+mediaUrl+" ERROR: ",error);
-            _scope.waitAfterLikeOperation();
-        })
-};
-
-this.waitAfterLikeOperation = function(){
-    var timeoutInterval = _scope.createInterval();
-    console.log("waiting "+timeoutInterval+" ms...");
-    setTimeout(_scope.onLikeMediaComplete, timeoutInterval);
-};
-
-this.onLikeMediaComplete = function(){
-    //mediaCounter++;
-    _scope.incrementMediaCounter();
-
-    var accountHasNextMedia = mediaCounter<totalMedia;
-
-    if(accountHasNextMedia){
-        currentMedia = mediaCollection[mediaCounter];
-        console.log(mediaCounter+" / "+totalMedia);
-        _scope.createLikeOnMedia();
-    }
-    else{
-
-        //var hasMoreMedia = mediaFeed.isMoreAvailable();
-        //console.log("hasMoreMedia="+hasMoreMedia);
-
-        console.log("!!! Like media for account "+currentAccount+".  AccountUrl:" +accountToSearchUrl+" LIKE OPERATIONS COMPLETE");
-
-        var timeoutInterval = _scope.createInterval();
-        console.log("waiting "+timeoutInterval+" ms...");
-        setTimeout(_scope.onAccountComplete, timeoutInterval);
-    }
-};
-
-this.onAccountComplete = function(){
-    console.log("onAccountComplete");
-    _scope.resetMediaCounters();
-    _scope.nextAccount();
-};
-this.nextAccount = function(){
-    var hasNextAccount = _scope.hasNextAccount();
-    if(hasNextAccount){
-        _scope.selectNextAccount();
-    }
-    else{
-        console.log("Accounts COMPLETE");
-    }
-};
-
-this.incrementMediaCounter = function(){
-    var incrementer = mediaCounterIncrements[Math.floor(Math.random()*mediaCounterIncrements.length)];
-    mediaCounter+=incrementer;
-};
-
-this.resetMediaCounters = function(){
-    mediaCounter = 0;
-    currentMedia = null;
-};
 this.createInterval = function(){
     return Math.round(Math.random()*10)*1000;
 };
-
-this.createMediaFeed = function(accountId){
-    mediaFeed = new Client.Feed.UserMedia(currentSession, accountId);
-
-    mediaFeed.get().then(function(results){
-        mediaCollection = results;
-        totalMedia = results.length;
-        console.log("account totalMedia:",totalMedia);
-
-        if(totalMedia>0){
-            currentMedia = mediaCollection[mediaCounter];
-            _scope.createLikeOnMedia();
-        }
-        else{
-            _scope.onAccountComplete();
-        }
-    });
-};
-
-/*
-this.createFollowersFeed = function(accountId){
-    followersFeed = new Client.Feed.AccountFollowers(currentSession, accountId);
-    _scope.getNextFollowersCollection();
-};
-
-this.getNextFollowersCollection = function(){
-    console.log("getNextFollowersCollection followersFeed="+followersFeed);
-    followersFeed.get().then(function(results){
-        totalFollowers+=results.length;
-
-        for(var i=0; i<results.length; i++){
-            var followerAccount = results[i];
-            //console.log("FOLLOWER:",followerAccount);
-
-            var accountIsPrivate = followerAccount._params.isPrivate;
-
-            if(!accountIsPrivate){
-                var followerUsername = followerAccount._params.username;
-                var image = followerAccount._params.picture;
-                var description = followerAccount._params.fullName;
-
-                //console.log("followerUsername:",followerUsername);
-                followers.push({name:followerUsername,image:image, description:description});
-            }
-        }
-
-
-        var hasMoreSelfFollowers = followersFeed.isMoreAvailable();
-        if(hasMoreSelfFollowers){
-            _scope.getNextFollowersCollection();
-        }
-        else{
-            //accountsCollection = accountsCollection.concat(additionalAccounts);
-            accountsCollection = followers;
-            console.log("Total account followers: "+accountsCollection.length);
-
-            accountsCollection = _scope.removeCollectionDuplicates(accountsCollection);
-            console.log("After removed duplicates: "+accountsCollection.length);
-
-            _scope.onFollowersLoadComplete();
-        }
-    });
-};
-*/
 
 this.removeCollectionDuplicates = function(sourceArray){
     return sourceArray.filter( onlyUnique );
@@ -311,6 +120,9 @@ function onlyUnique(value, index, self) {
 this.createListeners = function(){
     eventEmitter.on('onLoginRequest', _scope.onLoginRequest);
     eventEmitter.on('onGetFollowersRequest', _scope.onGetFollowersRequest);
+    eventEmitter.on('onMassLikingRequest', _scope.onMassLikingRequest);
+    eventEmitter.on('onAccountMassLikingOperationComplete', _scope.onAccountMassLikingOperationComplete);
+    eventEmitter.on('onAccountMassLikingTaskComplete', _scope.onAccountMassLikingTaskComplete);
 
     eventEmitter.on('onSelfLoginComplete', _scope.onSelfLoginComplete);
     eventEmitter.on('onSelfLoginError', _scope.onSelfLoginError);
@@ -325,6 +137,15 @@ this.onLoginRequest = function(data){
 this.onGetFollowersRequest = function(data){
     console.log("onGetFollowersRequest data=",data);
     _scope.getAccountFollowers = getFollowers.GetAccountFollowers(Client, currentSession, eventEmitter, data.accountId);
+};
+this.onMassLikingRequest = function(data){
+    _scope.massLikeTask = massLikingTask.MassLikingTask(Client, currentSession, eventEmitter, data);
+};
+this.onAccountMassLikingOperationComplete = function(accountName){
+    _scope.massLikeService.sendAccountCompleteResponse(accountName);
+};
+this.onAccountMassLikingTaskComplete = function(){
+    _scope.massLikeService.sendCompleteResponse();
 };
 
 this.onFollowersCountComplete = function(data){
