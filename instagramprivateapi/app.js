@@ -1,17 +1,12 @@
-//TODO errors about https://github.com/ifedapoolarewaju/igdm/issues/60
-
-//var login = 'easy_painting_feo';
-//var password = '9997tIy5B8';
-
 var _scope = this;
 
 var instaLoginService;
 _scope.instaGetFollowersService = null;
 var selfUser;
 _scope.getAccountFollowers = null;
+_scope.getFollowingCollection = null;
 
 var currentSession;
-
 
 var createError = require('http-errors');
 var express = require('express');
@@ -24,34 +19,22 @@ var Promise = require('bluebird');
 var cors = require('cors');
 
 var getFollowers = require('./div0/followers/GetAccountFollowers');
+var getFollowingCollection = require('./div0/followers/GetFollowingCollection');
 var massLikingTask = require('./div0/like/MassLikingTask');
 
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
-
-var indexRouter = require('./routes/index');
-
-var mediaCounterIncrements = [1,2];
-
-//var additionalAccounts = ["kirill.zhilkin", "kristina.sharipova22", "bionsetoo", "romanchuk69katrin", "anna_karat", "rabbitpark_", "dtcl1_1", "olgafilini", "garmoniya.feo", "logika_feo", "vikulichka_se", "evgeniyashuyts", "moroz91.ru", "aleksandrazoz", "annaguk2304", "muccuc_maria", "shefernatalia", "tamara_kuz", "cynep_mama", "mariavtoford", "irinaboikokudakova", "lizzflx", "alina__kalandadze", "alekseevaliubov1988", "marlenusy", "zuzernova", "lena_tolmacheva14", "klimaver", "tanya_kuzminaa_", "michael_icon", "katyshaa_25", "svetorana", "litekate", "ermaklena86", "dariia.meow", "gorskaya_margarita29", "soshnikova1810", "tasya_01.08", "natashabylgakova1981", "ilmira.bolotyan", "annapinchuk1", "victoria.trishina", "lena_tolmacheva14", "natanext", "mama_natascha", "olesya_black_olesya", "luchistui_pirogok","nysha.p", "shutterstruck", "belofoto", "anusha_bon", "mis_ekaterina_velikaya", "sensory_mom", "anna_pikalovafit", "zirenka", "aquapark_koktebel", "konsetulechka", "fedenkomila", "feodosiya_news", "ekaterina.goncharova", "ssvet_lana_s", "lesik100590", "lina_96_01", "irinavladimirovna_______", "avershina90", "svetlanaminashova77", "gorelova.elen", "natalya_domarova", "katekrym", "alexandrashindina", "anastasia_ai_da_olegovna", "tri_kota_feo", "tatyana_strelcova", "milenanew32", "evgenya93drobot", "chitalochka_feo", "__jane.art__", "aktyusha", "krim_otdih"];
 
 _scope.app = express();
 
 var user = require('./div0/user/user');
 
 // services
-var loginService = require('./div0/service/api/InstaLoginService');
+//var loginService = require('./div0/service/api/InstaLoginService');
 var getFollowersService = require('./div0/service/api/InstaGetFollowersService');
 var _massLikeService = require('./div0/service/api/InstaMassLikingService');
 
 var loginUser = require('./div0/user/loginUser');
-
-var accountsCollection = [];
-
-
-// view engine setup
-_scope.app.set('views', path.join(__dirname, 'views'));
-_scope.app.set('view engine', 'jade');
 
 _scope.app.use(logger('dev'));
 _scope.app.use(express.json());
@@ -59,46 +42,77 @@ _scope.app.use(express.urlencoded({ extended: false }));
 _scope.app.use(cookieParser());
 _scope.app.use(express.static(path.join(__dirname, 'public')));
 
-_scope.app.use('/', indexRouter);
-
 _scope.app.use(cors({origin: 'http://instagramprivateapi'}));
 
 // create services
-instaLoginService = new loginService.InstaLoginService(_scope.app, eventEmitter);
+//instaLoginService = new loginService.InstaLoginService(_scope.app, eventEmitter);
 _scope.instaGetFollowersService = new getFollowersService.InstaGetFollowersService(_scope.app, eventEmitter);
 _scope.massLikeService = new _massLikeService.InstaMassLikingService(_scope.app, eventEmitter);
+
+
+// TODO https://habr.com/post/127525/
+var io = require('socket.io').listen(8080);
+
+io.sockets.on('connection', function (socket) {
+    console.log("on client connected id="+socket.id);
+
+    socket.on('message', function (msg) {
+        console.log("on message from client: ",msg);
+        switch(msg.message.command){
+            case "login":
+                _scope.onLoginRequest(msg.message, socket);
+                break;
+            case "getFollowingCollection":
+                _scope.onGetFollowingCollectionRequest(socket,msg.message.id);
+                break;
+        }
+    });
+
+    socket.on('disconnect', function() {
+        console.log("client disconnected "+socket.id);
+    });
+});
+
 
 // catch 404 and forward to error handler
 _scope.app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
-_scope.app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
 var Client = require('instagram-private-api').V1;
 var device = new Client.Device('someuser2');
 var storage = new Client.CookieMemoryStorage();
 
-this.onSelfLoginComplete = function(user){
-    selfUser = user;
+this.onSelfLoginComplete = function(data){
+    console.log("onSelfLoginComplete");
+
+    var userSession = data.userSession;
+
+    selfUser = data.currentUser;
     currentSession = loginUser.getSession();
-    console.log("self login complete.");
-    instaLoginService.sendCompleteResponse(selfUser.id);
+    
+    if(userSession){
+        userSession.send({response:"loginComplete", data:selfUser.id, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
+    }
 };
 
-this.onSelfLoginError = function(error){
-    instaLoginService.sendErrorResponse(error);
+this.onSelfLoginError = function(data){
+    console.log("onSelfLoginError  data="+data);
+    var userSession = data.userSession;
+    
+    if(userSession){
+        console.log("sending to user login error...");
+        userSession.send({response:"loginError", data:data.error});
+    }
 };
 
+this.onFollowingCollectionLoadComplete = function(data){
+    console.log("onFollowingCollectionLoadComplete  data:",data);
+    var userSession = data.userSession;
+    if(userSession){
+        userSession.send({response:"onFollowingAccountsLoadComplete", data:data.following, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
+    }
+};
 this.onFollowersLoadComplete = function(data){
     var accountId = data.accountId;
     var accountFollowers = data.followers;
@@ -128,12 +142,30 @@ this.createListeners = function(){
     eventEmitter.on('onSelfLoginError', _scope.onSelfLoginError);
 
     eventEmitter.on("onFollowersLoadComplete", _scope.onFollowersLoadComplete);
+    eventEmitter.on("onFollowingCollectionLoadComplete", _scope.onFollowingCollectionLoadComplete);
 };
 
-this.onLoginRequest = function(data){
-    console.log("onLoginRequest()", data);
-    loginUser.execute(Client, device, storage, data.login, data.password, eventEmitter);
+this.onGetFollowingCollectionRequest = function(socket, accountId){
+    console.log("onGetFollowingCollectionRequest()");
+    _scope.getFollowingCollection = new getFollowingCollection.GetFollowingCollection(Client, currentSession, eventEmitter, accountId, socket);
 };
+
+this.onLoginRequest = function(data, socket){
+    console.log("onLoginRequest()", data);
+    
+    if(currentSession){
+        console.log("destroying current session to login by another user...");
+        
+        currentSession.destroy().then(function(response){
+            console.log("relogin with data ",data.login, data.password);
+            loginUser.execute(Client, device, storage, data.login, data.password, eventEmitter, socket);
+        });
+    }
+    else{
+        loginUser.execute(Client, device, storage, data.login, data.password, eventEmitter, socket);
+    }
+};
+
 this.onGetFollowersRequest = function(data){
     console.log("onGetFollowersRequest data=",data);
     _scope.getAccountFollowers = getFollowers.GetAccountFollowers(Client, currentSession, eventEmitter, data.accountId);

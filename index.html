@@ -13,6 +13,7 @@
     <script type="application/javascript" src="js/lib/collections/iterators/MapIterator.js"></script>
     <script type="application/javascript" src="js/lib/events/EventBus.js"></script>
     <script type="application/javascript" src="js/lib/bootstrap.min.js"></script>
+    <script type="application/javascript" src="js/lib/socket.io.js"></script>
 </head>
 <body>
     <div class="container" id="loginContainer">
@@ -34,22 +35,49 @@
 
     <div class="container" id="selfFollowersContainer">
         <div class="row">
-            <button id="getFollowersButton" style="display: none;" class="btn btn-default">Get followers</button>
+            <div class="col-md-3">
+                <div class="col-md-6" id="selfNameContainer">
+
+                </div>
+                <div class="col-md-6" id="selfImageContainer">
+
+                </div>
+            </div>
+            <div class="col-md-9">
+                <button id="getFollowersButton" style="display: none;" class="btn btn-default">Get followers</button>
+                <button id="getFollowingCollectionButton" style="display: none;" class="btn btn-info">Get following collection</button>
+            </div>
+
         </div>
         <div class="row">
             <div id="totalSelfFollowersContainer"></div>
         </div>
         <div class="row">
-            <div class="col-md-6">
-                <div class="container followersList" id="selfFollowers"></div>
+            <div class="col-md-4 smallHorizontalPadding">
+                <div class="followersList" id="selfFollowers"></div>
             </div>
-            <div class="col-md-6" id="addToLikeContainer" style="display: none;">
+
+            <div class="col-md-4 smallHorizontalPadding">
+                <div class="followersList" id="meFollowing"></div>
+            </div>
+
+            <div class="col-md-4 smallHorizontalPadding" id="addToLikeContainer" style="display: none;">
                 <div class="row">
                     <div class="col-md-6" id="addToLikeCollectionListHeader"></div>
                     <div class="col-md-6"><button id="createMassLikeRequestButton" class="btn-primary" style="display:none;">Create mass like</button></div>
                 </div>
                 <div class="container followersList" id="addToLikeCollectionContainer"></div>
             </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+                <input id="followersToLikeInput" type="text" style="width: 100%">
+            </div>
+            <div class="col-md-2">
+                <button id="createMassLikeFromStringRequestButton" class="btn-primary">Create mass like</button>
+            </div>
+
         </div>
     </div>
 </body>
@@ -57,6 +85,13 @@
 <script type="application/javascript" src="js/div0/followers/events/FollowerEvent.js"></script>
 <script type="application/javascript" src="js/div0/followers/FollowerListRenderer.js"></script>
 <script type="application/javascript" src="js/div0/followers/FollowersView.js"></script>
+
+<script type="application/javascript" src="js/div0/User.js"></script>
+<script type="application/javascript" src="js/div0/UsersParser.js"></script>
+
+<script type="application/javascript" src="js/div0/followers/SelfFollowingView.js"></script>
+<script type="application/javascript" src="js/div0/followers/FollowingAccountListRenderer.js"></script>
+
 <script type="application/javascript" src="js/div0/like/LikeRequestCollectionListView.js"></script>
 <script type="application/javascript" src="js/div0/like/LikeListRenderer.js"></script>
 <script type="application/javascript" src="js/div0/like/LikeEvent.js"></script>

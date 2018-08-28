@@ -1,17 +1,19 @@
 ///<reference path="../../lib/events/EventBus.ts"/>
 ///<reference path="events/FollowerEvent.ts"/>
+///<reference path="../User.ts"/>
 var FollowerListRenderer = (function () {
-    function FollowerListRenderer(parentElement, data) {
+    function FollowerListRenderer(parentElement, user) {
         this.j = jQuery.noConflict();
-        this.data = data;
+        this.data = user;
         this.parentElement = parentElement;
-        var name = data.name;
-        var image = data.image;
-        var description = data.description;
-        this.element = this.j("<div class='row'></div>");
-        var nameElement = this.j("<div class='col-md-4'><a href='https://www.instagram.com/" + name + "/' target='_blank'>" + name + "</a></div>");
+        var name = user.getUsername();
+        var image = user.getImage();
+        var description = user.getDescription();
+        var url = user.getUrl();
+        this.element = this.j("<div class='row followerListRenderer'></div>");
+        var nameElement = this.j("<div class='col-md-4 followerListRendererText small'><a href='" + url + "' target='_blank' >" + name + "</a></div>");
         var imageElement = this.j("<div class='col-md-2'><img src='" + image + "' style='width: 100%;'></div>");
-        var descriptionElement = this.j("<div class='col-md-4'>" + description + "</div>");
+        var descriptionElement = this.j("<div class='col-md-4 small followerListRendererText'>" + description + "</div>");
         nameElement.appendTo(this.element);
         imageElement.appendTo(this.element);
         descriptionElement.appendTo(this.element);

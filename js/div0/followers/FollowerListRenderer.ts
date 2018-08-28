@@ -1,26 +1,28 @@
 ///<reference path="../../lib/events/EventBus.ts"/>
 ///<reference path="events/FollowerEvent.ts"/>
+///<reference path="../User.ts"/>
 class FollowerListRenderer{
     private element:any;
     protected j:any;
     protected parentElement:any;
 
     private addToLikeCollectionButton:any;
-    protected data:any;
+    protected data:User;
 
 
-    constructor(parentElement:any, data:any){
+    constructor(parentElement:any, user:User){
         this.j = jQuery.noConflict();
-        this.data = data;
+        this.data = user;
         this.parentElement = parentElement;
-        var name:string = data.name;
-        var image:string = data.image;
-        var description = data.description;
+        var name:string = user.getUsername();
+        var image:string = user.getImage();
+        var description = user.getDescription();
+        var url = user.getUrl();
 
-        this.element = this.j("<div class='row'></div>");
-        var nameElement = this.j("<div class='col-md-4'><a href='https://www.instagram.com/"+name+"/' target='_blank'>"+name+"</a></div>");
+        this.element = this.j("<div class='row followerListRenderer'></div>");
+        var nameElement = this.j("<div class='col-md-4 followerListRendererText small'><a href='"+url+"' target='_blank' >"+name+"</a></div>");
         var imageElement = this.j("<div class='col-md-2'><img src='"+image+"' style='width: 100%;'></div>");
-        var descriptionElement = this.j("<div class='col-md-4'>"+description+"</div>");
+        var descriptionElement = this.j("<div class='col-md-4 small followerListRendererText'>"+description+"</div>");
 
         nameElement.appendTo(this.element);
         imageElement.appendTo(this.element);

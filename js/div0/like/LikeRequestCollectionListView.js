@@ -13,9 +13,11 @@ var LikeRequestCollectionListView = (function () {
         this.listContainer = this.j("#addToLikeCollectionContainer");
         this.headerElement = this.j("#addToLikeCollectionListHeader");
         this.createMassLikeRequestButton = this.j("#createMassLikeRequestButton");
+        this.createMassLikeFromStringRequestButton = this.j("#createMassLikeFromStringRequestButton");
         this.onCollectionChanged();
         this.element.show();
         this.createMassLikeRequestButton.click(function () { return _this.onCreateMassLikeButtonClicked(); });
+        this.createMassLikeFromStringRequestButton.click(function () { return _this.createMassLikeFromStringButtonClicked(); });
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, function (data) { return _this.onAddToLikeCollectionRequest(data); });
     }
     LikeRequestCollectionListView.prototype.onAddToLikeCollectionRequest = function (data) {
@@ -39,6 +41,13 @@ var LikeRequestCollectionListView = (function () {
     LikeRequestCollectionListView.prototype.onCreateMassLikeButtonClicked = function () {
         var data = this.buildData();
         console.log("onCreateMassLikeButtonClicked collection:", data);
+        EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
+    };
+    LikeRequestCollectionListView.prototype.createMassLikeFromStringButtonClicked = function () {
+        var userData = this.j("#followersToLikeInput").val();
+        var data = userData.split(",");
+        console.log("data:", data);
+        data = data.reverse();
         EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
     };
     LikeRequestCollectionListView.prototype.buildData = function () {

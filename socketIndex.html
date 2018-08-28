@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>socket index</title>
+    <script src="js/lib/socket.io.js"></script>
+</head>
+<body>
+</body>
+<script>
+    var socket = io('http://instagramprivateapi:8080');
+
+    socket.on('connect', function(){
+        console.log("on connected - sending hello");
+        socket.send({'message': {command:'login', login:"brain_shutter",password:"864FFge3Wq"}});
+    });
+    socket.on('message', function(message){
+        console.log("on message from server: ",message);
+        parseMessage(message);
+    });
+    socket.on('event', function(data){
+        console.log("on event ",data);
+    });
+    socket.on('disconnect', function(){
+        console.log("on disconnect");
+    });
+
+
+    function parseMessage(message){
+        console.log("parsing message ",message);
+        var response = message.response;
+        switch(response){
+            case "loginError":
+                var errorText = message.data.message;
+                alert(errorText);
+                break;
+            case "loginComplete":
+                var selfId = message.data;
+                console.log("login complete. selfId="+selfId);
+                break;
+        }
+    }
+
+</script>
+</html>

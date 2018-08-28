@@ -10,6 +10,7 @@ class LikeRequestCollectionListView{
     private listContainer:any;
     private headerElement:any;
     private createMassLikeRequestButton:any;
+    private createMassLikeFromStringRequestButton:any;
 
     private collection:Map<any> = new Map<any>("colection");
 
@@ -19,11 +20,14 @@ class LikeRequestCollectionListView{
         this.listContainer = this.j("#addToLikeCollectionContainer");
         this.headerElement = this.j("#addToLikeCollectionListHeader");
         this.createMassLikeRequestButton = this.j("#createMassLikeRequestButton");
+        this.createMassLikeFromStringRequestButton = this.j("#createMassLikeFromStringRequestButton");
         this.onCollectionChanged();
 
         this.element.show();
 
         this.createMassLikeRequestButton.click(()=>this.onCreateMassLikeButtonClicked());
+        this.createMassLikeFromStringRequestButton.click(()=>this.createMassLikeFromStringButtonClicked());
+        
 
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, (data)=>this.onAddToLikeCollectionRequest(data));
 
@@ -52,6 +56,14 @@ class LikeRequestCollectionListView{
     private onCreateMassLikeButtonClicked():void {
         var data:any[] = this.buildData();
         console.log("onCreateMassLikeButtonClicked collection:",data);
+        EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
+    }
+    private createMassLikeFromStringButtonClicked():void{
+        var userData:string = this.j("#followersToLikeInput").val();
+
+        var data:string[] = userData.split(",");
+        console.log("data:",data);
+        data = data.reverse();
         EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
     }
 

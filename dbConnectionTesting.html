@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dbConnection testing</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <button class="btn btn-success" id="testConnectToDbButton">Connect to db</button>
+</body>
+
+<script type="application/javascript">
+    document.addEventListener("DOMContentLoaded", ready);
+    function ready(){
+        $("#testConnectToDbButton").click(function(){
+            var jqxhr = $.post( "php/api.php", {method:"createAccount", data:JSON.stringify({id:0,name:"ilya",url:"http://",image:"http://image",category:0, follower:1})});
+
+            jqxhr.done(function(response) {
+                console.log( "response ",response );
+            })
+                    .fail(function() {
+                        //alert( "error" );
+                    })
+                    .always(function() {
+                        //alert( "finished" );
+                    });
+
+        });
+    }
+</script>
+
+</html>

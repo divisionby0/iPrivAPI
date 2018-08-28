@@ -1,10 +1,11 @@
 ///<reference path="FollowerListRenderer.ts"/>
+///<reference path="../User.ts"/>
 class FollowersView{
-    private parentContainer:any;
-    private collection:any[];
-    private j:any;
+    protected parentContainer:any;
+    protected collection:any[];
+    protected j:any;
 
-    constructor(parentContainer:any, collection:any[]){
+    constructor(parentContainer:any, collection:User[]){
         this.j = jQuery.noConflict();
         this.parentContainer = parentContainer;
         this.collection = collection;
@@ -12,7 +13,11 @@ class FollowersView{
         this.j("#totalSelfFollowersContainer").text("Total followers: "+collection.length);
 
         for(var i:number = 0; i<this.collection.length; i++){
-            new FollowerListRenderer(this.parentContainer, this.collection[i]);
+            this.createRenderer(this.parentContainer, this.collection[i]);
         }
+    }
+    
+    protected createRenderer(parentContainer:any, data:User):void{
+        new FollowerListRenderer(parentContainer, data);
     }
 }
