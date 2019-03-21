@@ -1,33 +1,19 @@
-var MassLikingTask = function(client, session, eventEmitter, data, waitInterval){
+var DetectMediaAlreadyHasLike = function(session, eventEmitter, media){
     var _that = this;
-    _that.client = client;
     _that.session = session;
-    _that.likesHasBeenSetTotal = 0;
+    _that.currentMedia = media;
 
-    _that.accountCounter = -1;
-    _that.currentAccount = null;
-    //_that.minutesToWait = 1.5;
-    _that.minutesToWait = waitInterval;
+    media.likers(function(session, mediaId){
+        
+    });
 
-    var collection = JSON.parse(data.collection);
-    console.log("collection=",collection);
-
-    _that.selectedAccountName = "";
-
-    _that.collection = collection;
-    _that.totalAccounts = collection.length;
-    _that.mediaFeed = null;
-    _that.mediaCollection = null;
-    _that.mediaCounter = 0;
-    _that.totalMedia = 0;
-    _that.currentMedia = null;
-
+    /*
     this.selectNextAccount = function(){
         _that.accountCounter+=1;
         _that.currentAccount = _that.collection[_that.accountCounter];
         console.log("Liking account "+_that.accountCounter+" / "+_that.collection.length);
 
-        _that.selectedAccountName = "https://instagram.com/"+_that.currentAccount+"/";
+        _that.selectedAccountName = "https://instagram/"+_that.currentAccount;
 
         _that.feed = client.Account.searchForUser(session, _that.currentAccount).then(function(account){
             console.log("account selected");
@@ -51,6 +37,9 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
 
             if(_that.totalMedia>0){
                 _that.currentMedia = _that.mediaCollection[_that.mediaCounter];
+
+
+
                 _that.createLikeOnMedia();
             }
             else{
@@ -70,35 +59,24 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
 
         console.log("Account "+_that.selectedAccountName+" creating LIKE on media "+mediaId+"  url="+mediaUrl);
 
-        var mediaAlreadyHasLiked = _that.currentMedia._params.hasLiked;
-
-        console.log("mediaAlreadyHasLiked="+mediaAlreadyHasLiked);
-
-        if(!mediaAlreadyHasLiked){
-            new client.Request(session)
-                .setMethod('POST')
-                .setResource('like', {id: mediaId})
-                .generateUUID()
-                .setData({
-                    media_id: mediaId,
-                    src: "profile"
-                })
-                .signPayload()
-                .send()
-                .then(function(data) {
-                    console.log("Account "+_that.selectedAccountName+" like media "+mediaUrl+" complete");
-                    console.log("Account "+_that.accountCounter+" of "+_that.collection.length);
-                    _that.likesHasBeenSetTotal+=1;
-                    _that.waitAfterLikeOperation();
-                })
-                .catch(function(error){
-                    console.error("Account "+_that.selectedAccountName+" like media "+mediaUrl+" ERROR: ",error);
-                    _that.waitAfterLikeOperation();
-                })
-        }
-        else{
-            _that.onLikeMediaComplete();
-        }
+        new client.Request(session)
+            .setMethod('POST')
+            .setResource('like', {id: mediaId})
+            .generateUUID()
+            .setData({
+                media_id: mediaId,
+                src: "profile"
+            })
+            .signPayload()
+            .send()
+            .then(function(data) {
+                console.log("Account "+_that.selectedAccountName+" like media "+mediaUrl+" complete");
+                _that.waitAfterLikeOperation();
+            })
+            .catch(function(error){
+                console.error("Account "+_that.selectedAccountName+" like media "+mediaUrl+" ERROR: ",error);
+                _that.waitAfterLikeOperation();
+            })
     };
 
     this.waitAfterLikeOperation = function(){
@@ -119,7 +97,6 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
         }
         else{
             console.log("!!! Like media for account "+_that.selectedAccountName+" TASK COMPLETE");
-            console.log("likesHasBeenSetTotal="+_that.likesHasBeenSetTotal);
 
             var timeoutInterval = _that.createInterval();
             console.log("waiting "+Math.round(timeoutInterval)+" ms...");
@@ -129,7 +106,7 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
 
     this.onAccountComplete = function(){
         console.log("onAccountComplete "+_that.selectedAccountName);
-        console.log("likesHasBeenSetTotal="+_that.likesHasBeenSetTotal);
+
         //eventEmitter.emit("onAccountMassLikingOperationComplete", _that.currentAccount);
 
         _that.resetMediaCounters();
@@ -172,7 +149,6 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
     };
 
     this.createInterval = function(){
-        console.log("_that.minutesToWait="+_that.minutesToWait);
         var msToWait = Math.round(Math.random()*_that.minutesToWait*60*1000);
         return msToWait;
     };
@@ -180,7 +156,6 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
     var timeoutInterval = _that.createInterval();
     console.log("waiting "+Math.round(timeoutInterval)+" ms...");
     setTimeout( _that.selectNextAccount, timeoutInterval);
+    */
 };
-
-module.exports.MassLikingTask = MassLikingTask;
-
+module.exports.DetectMediaAlreadyHasLike = DetectMediaAlreadyHasLike;

@@ -4,6 +4,7 @@
 ///<reference path="LikeListRenderer.ts"/>
 ///<reference path="../../lib/collections/Map.ts"/>
 ///<reference path="LikeEvent.ts"/>
+///<reference path="../User.ts"/>
 class LikeRequestCollectionListView{
     private j:any;
     private element:any;
@@ -12,7 +13,7 @@ class LikeRequestCollectionListView{
     private createMassLikeRequestButton:any;
     private createMassLikeFromStringRequestButton:any;
 
-    private collection:Map<any> = new Map<any>("colection");
+    private collection:Map<User> = new Map<User>("colection");
 
     constructor(){
         this.j = jQuery.noConflict();
@@ -33,11 +34,11 @@ class LikeRequestCollectionListView{
 
     }
 
-    private onAddToLikeCollectionRequest(data:any):void{
-        var name:string = data.name;
+    private onAddToLikeCollectionRequest(user:User):void{
+        var name:string = user.getUsername();
         if(!this.collection.has(name)){
-            this.collection.add(data.name, data);
-            new LikeListRenderer(this.listContainer, data);
+            this.collection.add(name, user);
+            new LikeListRenderer(this.listContainer, user);
             this.onCollectionChanged();
         }
     }
@@ -67,12 +68,12 @@ class LikeRequestCollectionListView{
         EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
     }
 
-    private buildData():any[]{
-        var data:any[] = [];
+    private buildData():string[]{
+        var data:string[] = [];
         var iterator:MapIterator = this.collection.getIterator();
         while(iterator.hasNext()){
-            var item:any = iterator.next();
-            var name:string = item.name;
+            var item:User = iterator.next();
+            var name:string = item.getUsername();
             data.push(name);
         }
         return data;

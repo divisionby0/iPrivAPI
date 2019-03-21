@@ -1,4 +1,6 @@
+var version = "0.0.1";
 var _scope = this;
+var waitInterval = 0.6;
 
 var instaLoginService;
 _scope.instaGetFollowersService = null;
@@ -7,7 +9,7 @@ _scope.getAccountFollowers = null;
 _scope.getFollowingCollection = null;
 
 var currentSession;
-
+console.log(version);
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -171,7 +173,7 @@ this.onGetFollowersRequest = function(data){
     _scope.getAccountFollowers = getFollowers.GetAccountFollowers(Client, currentSession, eventEmitter, data.accountId);
 };
 this.onMassLikingRequest = function(data){
-    _scope.massLikeTask = massLikingTask.MassLikingTask(Client, currentSession, eventEmitter, data);
+    _scope.massLikeTask = massLikingTask.MassLikingTask(Client, currentSession, eventEmitter, data, waitInterval);
 };
 this.onAccountMassLikingOperationComplete = function(accountName){
     _scope.massLikeService.sendAccountCompleteResponse(accountName);

@@ -4,6 +4,7 @@
 ///<reference path="LikeListRenderer.ts"/>
 ///<reference path="../../lib/collections/Map.ts"/>
 ///<reference path="LikeEvent.ts"/>
+///<reference path="../User.ts"/>
 var LikeRequestCollectionListView = (function () {
     function LikeRequestCollectionListView() {
         var _this = this;
@@ -20,11 +21,11 @@ var LikeRequestCollectionListView = (function () {
         this.createMassLikeFromStringRequestButton.click(function () { return _this.createMassLikeFromStringButtonClicked(); });
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, function (data) { return _this.onAddToLikeCollectionRequest(data); });
     }
-    LikeRequestCollectionListView.prototype.onAddToLikeCollectionRequest = function (data) {
-        var name = data.name;
+    LikeRequestCollectionListView.prototype.onAddToLikeCollectionRequest = function (user) {
+        var name = user.getUsername();
         if (!this.collection.has(name)) {
-            this.collection.add(data.name, data);
-            new LikeListRenderer(this.listContainer, data);
+            this.collection.add(name, user);
+            new LikeListRenderer(this.listContainer, user);
             this.onCollectionChanged();
         }
     };
@@ -55,7 +56,7 @@ var LikeRequestCollectionListView = (function () {
         var iterator = this.collection.getIterator();
         while (iterator.hasNext()) {
             var item = iterator.next();
-            var name = item.name;
+            var name = item.getUsername();
             data.push(name);
         }
         return data;
