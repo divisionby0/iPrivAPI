@@ -29,9 +29,7 @@ class LikeRequestCollectionListView{
         this.createMassLikeRequestButton.click(()=>this.onCreateMassLikeButtonClicked());
         this.createMassLikeFromStringRequestButton.click(()=>this.createMassLikeFromStringButtonClicked());
         
-
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, (data)=>this.onAddToLikeCollectionRequest(data));
-
     }
 
     private onAddToLikeCollectionRequest(user:User):void{

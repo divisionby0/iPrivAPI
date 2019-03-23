@@ -5,13 +5,14 @@
 ///<reference path="div0/UsersParser.ts"/>
 var MyApplication = (function () {
     function MyApplication() {
+        this.version = "0.0.1";
         this.server = "http://instagramprivateapi:3000";
         this.loginRoute = "/instaLogin";
         this.getFollowersRoute = "/getFollowers";
         this.accountId = 0;
         this.socketUrl = "http://instagramprivateapi:8080";
         this.j = jQuery.noConflict();
-        console.log("Im Application j=", this.j);
+        console.log("Im Application ver=", this.version);
         this.createSocketConnection();
     }
     MyApplication.prototype.createSocketConnection = function () {
@@ -54,9 +55,30 @@ var MyApplication = (function () {
     };
     MyApplication.prototype.onFollowingAccountsLoadComplete = function (data) {
         var parser = new UsersParser(data.data);
-        this.imFollowingCollection = parser.parse();
-        new SelfFollowingView(this.j("#meFollowing"), this.imFollowingCollection);
-        this.showNotMyFollowers();
+        this.followingCollection = parser.parse();
+        this.updateRelations();
+        new SelfFollowingView(this.j("#meFollowing"), this.followingCollection);
+        //this.showNotMyFollowers();
+    };
+    MyApplication.prototype.updateRelations = function () {
+        var totalFollowingUsers = this.followingCollection.length;
+        var totalFollowers = this.followersCollection.length;
+        var i;
+        var j;
+        for (i = 0; i < totalFollowingUsers; i++) {
+            var followingUser = this.followingCollection[i];
+            var followingUserName = followingUser.getUsername();
+            var isFollowingMe = false;
+            for (j = 0; j < totalFollowers; j++) {
+                var follower = this.followersCollection[j];
+                var followerName = follower.getUsername();
+                if (followingUserName == followerName) {
+                    isFollowingMe = true;
+                    break;
+                }
+            }
+            followingUser.setIsFollowingMe(isFollowingMe);
+        }
     };
     MyApplication.prototype.showNotMyFollowers = function () {
     };
@@ -94,8 +116,8 @@ var MyApplication = (function () {
         console.log("onGetFollowersResponse:", response);
         //this.myFollowersCollection = response.data;
         var parser = new UsersParser(response.data);
-        this.myFollowersCollection = parser.parse();
-        new FollowersView(this.j("#selfFollowers"), this.myFollowersCollection);
+        this.followersCollection = parser.parse();
+        new FollowersView(this.j("#selfFollowers"), this.followersCollection);
         new LikeRequestCollectionListView();
     };
     MyApplication.prototype.onGetFollowersError = function (error) {

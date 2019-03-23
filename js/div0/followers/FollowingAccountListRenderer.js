@@ -4,14 +4,18 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 ///<reference path="FollowerListRenderer.ts"/>
+///<reference path="FollowingListRenderer.ts"/>
 var FollowingAccountListRenderer = (function (_super) {
     __extends(FollowingAccountListRenderer, _super);
     function FollowingAccountListRenderer() {
         _super.apply(this, arguments);
     }
-    FollowingAccountListRenderer.prototype.createChildren = function () {
-    };
-    FollowingAccountListRenderer.prototype.createListeners = function () {
+    FollowingAccountListRenderer.prototype.createNameElement = function () {
+        var color = "red";
+        if (this.data.isFollowingMe() == true) {
+            color = "green";
+        }
+        return this.j("<div class='col-md-4 followerListRendererText small'><a href='" + this.data.getUrl() + "' target='_blank' >" + this.data.getUsername() + "  <span style='color: " + color + ";'><b>" + this.data.isFollowingMe() + "</b></span>" + "</a></div>");
     };
     return FollowingAccountListRenderer;
 }(FollowerListRenderer));

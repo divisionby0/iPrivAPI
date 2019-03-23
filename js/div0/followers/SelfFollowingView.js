@@ -11,6 +11,7 @@ var SelfFollowingView = (function (_super) {
         _super.apply(this, arguments);
     }
     SelfFollowingView.prototype.createRenderer = function (parentContainer, data) {
+        console.log("SelfFollowingView.create renderer");
         new FollowingAccountListRenderer(parentContainer, data);
     };
     return SelfFollowingView;

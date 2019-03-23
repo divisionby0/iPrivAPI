@@ -11,7 +11,8 @@ var FollowerListRenderer = (function () {
         var description = user.getDescription();
         var url = user.getUrl();
         this.element = this.j("<div class='row followerListRenderer'></div>");
-        var nameElement = this.j("<div class='col-md-4 followerListRendererText small'><a href='" + url + "' target='_blank' >" + name + "</a></div>");
+        //var nameElement = this.j("<div class='col-md-4 followerListRendererText small'><a href='"+url+"' target='_blank' >"+name+"</a></div>");
+        var nameElement = this.createNameElement(url);
         var imageElement = this.j("<div class='col-md-2'><img src='" + image + "' style='width: 100%;'></div>");
         var descriptionElement = this.j("<div class='col-md-4 small followerListRendererText'>" + description + "</div>");
         nameElement.appendTo(this.element);
@@ -21,6 +22,9 @@ var FollowerListRenderer = (function () {
         this.element.appendTo(parentElement);
         this.createListeners();
     }
+    FollowerListRenderer.prototype.createNameElement = function () {
+        return this.j("<div class='col-md-4 followerListRendererText small'><a href='" + this.data.getUrl() + "' target='_blank' >" + this.data.getUsername() + "</a></div>");
+    };
     FollowerListRenderer.prototype.createChildren = function () {
         var addToLikeCollectionButtonContainer = this.j("<div class='col-md-2'></div>");
         this.addToLikeCollectionButton = this.j("<button id='addToLikeCollectionButton'>Like</button>");

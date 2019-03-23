@@ -1,6 +1,6 @@
-var version = "0.0.1";
+var version = "0.0.2";
 var _scope = this;
-var waitInterval = 0.6;
+var waitInterval = 0.84;
 
 var instaLoginService;
 _scope.instaGetFollowersService = null;
