@@ -14,7 +14,6 @@ var GetAccountFollowers = function(client, session, eventEmitter, accountId){
     _that.followers = [];
 
     this.nextFeedPage = function(){
-        console.log("nextFeedPage");
 
         _that.feed.get().then(function(results){
 
@@ -32,9 +31,7 @@ var GetAccountFollowers = function(client, session, eventEmitter, accountId){
                 }
             }
 
-            console.log("feed page followers added ");
             var hasNextFeedPage = _that.feed.isMoreAvailable();
-            console.log("hasNextFeedPage="+hasNextFeedPage);
 
             if(hasNextFeedPage){
                 _that.nextFeedPage();

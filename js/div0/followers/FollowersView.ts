@@ -10,11 +10,14 @@ class FollowersView{
         this.parentContainer = parentContainer;
         this.collection = collection;
 
-        this.j("#totalSelfFollowersContainer").text("Total followers: "+collection.length);
+        this.showCount();
 
         for(var i:number = 0; i<this.collection.length; i++){
             this.createRenderer(this.parentContainer, this.collection[i]);
         }
+    }
+    protected showCount():void{
+        this.j("#totalFollowingContainer").text("Total followers: "+this.collection.length);
     }
     
     protected createRenderer(parentContainer:any, data:User):void{

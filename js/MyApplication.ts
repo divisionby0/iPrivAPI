@@ -3,10 +3,12 @@
 ///<reference path="div0/like/service/MassLikeService.ts"/>
 ///<reference path="div0/followers/SelfFollowingView.ts"/>
 ///<reference path="div0/UsersParser.ts"/>
+///<reference path="lib/events/EventBus.ts"/>
+///<reference path="div0/followers/events/FollowerEvent.ts"/>
 class MyApplication{
     private j:any;
 
-    private version:string = "0.0.1";
+    private version:string = "0.0.3";
 
     private server:string = "http://instagramprivateapi:3000";
     private loginRoute:string = "/instaLogin";
@@ -20,12 +22,31 @@ class MyApplication{
     
     private followersCollection:any[];
     private followingCollection:any[];
+    private manualMassLikeCollection:Map<string> = new Map<string>("colection");
     
     constructor(){
         this.j = jQuery.noConflict();
         console.log("Im Application ver=",this.version);
+        this.j("#versionContainer").text(this.version);
 
         this.createSocketConnection();
+        EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, (data)=>this.onAddToLikeCollectionRequest(data));
+    }
+
+    private onAddToLikeCollectionRequest(user:User):void{
+        var name:string = user.getUsername();
+        if(!this.manualMassLikeCollection.has(name)){
+            this.manualMassLikeCollection.add(name, name);
+
+            var collection:string[] = new Array();
+            var iterator:MapIterator = this.manualMassLikeCollection.getIterator();
+            while(iterator.hasNext()){
+                name = iterator.next();
+                collection.push(name);
+            }
+            var names:string = collection.join();
+            this.j("#manualMassLikeInput").val(names);
+        }
     }
 
     private createSocketConnection():void{
@@ -46,7 +67,7 @@ class MyApplication{
     }
 
     private parseSocketMessage(message):void{
-        console.log("parsing message ",message);
+        //console.log("parsing message ",message);
         var response = message.response;
         switch(response){
             case "loginError":
@@ -77,8 +98,6 @@ class MyApplication{
         this.followingCollection = parser.parse();
         this.updateRelations();
         new SelfFollowingView(this.j("#meFollowing"), this.followingCollection);
-        
-        //this.showNotMyFollowers();
     }
     
     private updateRelations():void{
@@ -129,7 +148,7 @@ class MyApplication{
     }
 
     private onGetSelfFollowersClicked():void {
-        console.log("onGetSelfFollowersClicked this.accountId="+this.accountId);
+       // console.log("onGetSelfFollowersClicked this.accountId="+this.accountId);
         this.j.ajax({
             type: "POST",
             url: this.server+this.getFollowersRoute,
@@ -141,7 +160,7 @@ class MyApplication{
     }
 
     private onGetFollowersResponse(response:any):void{
-        console.log("onGetFollowersResponse:",response);
+        //console.log("onGetFollowersResponse:",response);
         
         //this.myFollowersCollection = response.data;
 
@@ -179,7 +198,7 @@ class MyApplication{
     }
 
     private onSockedMessage(message:any):void {
-        console.log("on message from server: ",message);
+        //console.log("on message from server: ",message);
         this.parseSocketMessage(message);
     }
 

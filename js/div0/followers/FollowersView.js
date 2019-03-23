@@ -5,11 +5,14 @@ var FollowersView = (function () {
         this.j = jQuery.noConflict();
         this.parentContainer = parentContainer;
         this.collection = collection;
-        this.j("#totalSelfFollowersContainer").text("Total followers: " + collection.length);
+        this.showCount();
         for (var i = 0; i < this.collection.length; i++) {
             this.createRenderer(this.parentContainer, this.collection[i]);
         }
     }
+    FollowersView.prototype.showCount = function () {
+        this.j("#totalFollowingContainer").text("Total followers: " + this.collection.length);
+    };
     FollowersView.prototype.createRenderer = function (parentContainer, data) {
         new FollowerListRenderer(parentContainer, data);
     };

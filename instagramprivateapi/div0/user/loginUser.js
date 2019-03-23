@@ -7,13 +7,12 @@ var execute = function(client, device, storage, login, password, eventEmitter, u
 
     var _that = this;
     _that.userSession = userSession;
-    console.log("authorizing "+login+" / "+password);
 
     client.Session.create(device, storage, login, password).then(function(session){
         currentSession = session;
         
         currentSession.getAccount().then(function(data){
-            console.log("Account: ",data);
+            //console.log("Account: ",data);
 
             selfAccountId = data._params.id;
             var currentUser = new user.User(selfAccountId);

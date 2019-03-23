@@ -1,6 +1,6 @@
-var version = "0.0.2";
+var version = "0.0.6";
 var _scope = this;
-var waitInterval = 0.84;
+var waitInterval = 0.68;
 
 var instaLoginService;
 _scope.instaGetFollowersService = null;
@@ -59,7 +59,7 @@ io.sockets.on('connection', function (socket) {
     console.log("on client connected id="+socket.id);
 
     socket.on('message', function (msg) {
-        console.log("on message from client: ",msg);
+        //console.log("on message from client: ",msg);
         switch(msg.message.command){
             case "login":
                 _scope.onLoginRequest(msg.message, socket);
@@ -109,7 +109,7 @@ this.onSelfLoginError = function(data){
 };
 
 this.onFollowingCollectionLoadComplete = function(data){
-    console.log("onFollowingCollectionLoadComplete  data:",data);
+    //console.log("onFollowingCollectionLoadComplete  data:",data);
     var userSession = data.userSession;
     if(userSession){
         userSession.send({response:"onFollowingAccountsLoadComplete", data:data.following, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
@@ -153,13 +153,12 @@ this.onGetFollowingCollectionRequest = function(socket, accountId){
 };
 
 this.onLoginRequest = function(data, socket){
-    console.log("onLoginRequest()", data);
-    
+    console.log("onLoginRequest");
     if(currentSession){
         console.log("destroying current session to login by another user...");
         
         currentSession.destroy().then(function(response){
-            console.log("relogin with data ",data.login, data.password);
+            console.log("relogin with given data ");
             loginUser.execute(Client, device, storage, data.login, data.password, eventEmitter, socket);
         });
     }
@@ -169,7 +168,7 @@ this.onLoginRequest = function(data, socket){
 };
 
 this.onGetFollowersRequest = function(data){
-    console.log("onGetFollowersRequest data=",data);
+    //console.log("onGetFollowersRequest data=",data);
     _scope.getAccountFollowers = getFollowers.GetAccountFollowers(Client, currentSession, eventEmitter, data.accountId);
 };
 this.onMassLikingRequest = function(data){
@@ -183,10 +182,10 @@ this.onAccountMassLikingTaskComplete = function(){
 };
 
 this.onFollowersCountComplete = function(data){
-    console.log("onFollowersCountComplete");
+    //console.log("onFollowersCountComplete");
     var accountId = data.accountId;
     var total = data.total;
-    console.log("onFollowersCountComplete accountId="+accountId+" total="+total);
+    //console.log("onFollowersCountComplete accountId="+accountId+" total="+total);
 };
 
 _scope.createListeners();

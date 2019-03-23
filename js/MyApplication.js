@@ -3,18 +3,38 @@
 ///<reference path="div0/like/service/MassLikeService.ts"/>
 ///<reference path="div0/followers/SelfFollowingView.ts"/>
 ///<reference path="div0/UsersParser.ts"/>
+///<reference path="lib/events/EventBus.ts"/>
+///<reference path="div0/followers/events/FollowerEvent.ts"/>
 var MyApplication = (function () {
     function MyApplication() {
-        this.version = "0.0.1";
+        var _this = this;
+        this.version = "0.0.3";
         this.server = "http://instagramprivateapi:3000";
         this.loginRoute = "/instaLogin";
         this.getFollowersRoute = "/getFollowers";
         this.accountId = 0;
         this.socketUrl = "http://instagramprivateapi:8080";
+        this.manualMassLikeCollection = new Map("colection");
         this.j = jQuery.noConflict();
         console.log("Im Application ver=", this.version);
+        this.j("#versionContainer").text(this.version);
         this.createSocketConnection();
+        EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, function (data) { return _this.onAddToLikeCollectionRequest(data); });
     }
+    MyApplication.prototype.onAddToLikeCollectionRequest = function (user) {
+        var name = user.getUsername();
+        if (!this.manualMassLikeCollection.has(name)) {
+            this.manualMassLikeCollection.add(name, name);
+            var collection = new Array();
+            var iterator = this.manualMassLikeCollection.getIterator();
+            while (iterator.hasNext()) {
+                name = iterator.next();
+                collection.push(name);
+            }
+            var names = collection.join();
+            this.j("#manualMassLikeInput").val(names);
+        }
+    };
     MyApplication.prototype.createSocketConnection = function () {
         var _this = this;
         this.socket = io(this.socketUrl);
@@ -31,7 +51,7 @@ var MyApplication = (function () {
         EventBus.addEventListener(LikeEvent.MASS_LIKE_REQUEST, function (data) { return _this.onMassLikeRequest(data); });
     };
     MyApplication.prototype.parseSocketMessage = function (message) {
-        console.log("parsing message ", message);
+        //console.log("parsing message ",message);
         var response = message.response;
         switch (response) {
             case "loginError":
@@ -58,7 +78,6 @@ var MyApplication = (function () {
         this.followingCollection = parser.parse();
         this.updateRelations();
         new SelfFollowingView(this.j("#meFollowing"), this.followingCollection);
-        //this.showNotMyFollowers();
     };
     MyApplication.prototype.updateRelations = function () {
         var totalFollowingUsers = this.followingCollection.length;
@@ -102,7 +121,7 @@ var MyApplication = (function () {
     };
     MyApplication.prototype.onGetSelfFollowersClicked = function () {
         var _this = this;
-        console.log("onGetSelfFollowersClicked this.accountId=" + this.accountId);
+        // console.log("onGetSelfFollowersClicked this.accountId="+this.accountId);
         this.j.ajax({
             type: "POST",
             url: this.server + this.getFollowersRoute,
@@ -113,7 +132,7 @@ var MyApplication = (function () {
         });
     };
     MyApplication.prototype.onGetFollowersResponse = function (response) {
-        console.log("onGetFollowersResponse:", response);
+        //console.log("onGetFollowersResponse:",response);
         //this.myFollowersCollection = response.data;
         var parser = new UsersParser(response.data);
         this.followersCollection = parser.parse();
@@ -142,7 +161,7 @@ var MyApplication = (function () {
         this.startApp();
     };
     MyApplication.prototype.onSockedMessage = function (message) {
-        console.log("on message from server: ", message);
+        //console.log("on message from server: ",message);
         this.parseSocketMessage(message);
     };
     MyApplication.prototype.onSockedEvent = function (data) {

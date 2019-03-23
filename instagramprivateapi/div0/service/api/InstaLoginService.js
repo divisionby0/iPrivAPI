@@ -10,8 +10,8 @@ var InstaLoginService = function(app, eventEmitter){
         _that.request = req;
         _that.response = res;
 
-        console.log("login:",req.body.login);
-        console.log("pass:",req.body.pass);
+        //console.log("login:",req.body.login);
+        //console.log("pass:",req.body.pass);
 
         eventEmitter.emit("onLoginRequest", {login:req.body.login, password:req.body.pass});
     });

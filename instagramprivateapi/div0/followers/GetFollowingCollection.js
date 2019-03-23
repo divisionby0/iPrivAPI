@@ -15,7 +15,7 @@ var GetFollowingCollection = function(client, session, eventEmitter, accountId, 
     _that.followingCollection = [];
 
     this.nextFeedPage = function(){
-        console.log("nextFeedPage");
+        //console.log("nextFeedPage");
 
         _that.feed.get().then(function(results){
 
@@ -33,9 +33,9 @@ var GetFollowingCollection = function(client, session, eventEmitter, accountId, 
                 }
             }
 
-            console.log("feed page following added ");
+            //console.log("feed page following added ");
             var hasNextFeedPage = _that.feed.isMoreAvailable();
-            console.log("hasNextFeedPage="+hasNextFeedPage);
+            //console.log("hasNextFeedPage="+hasNextFeedPage);
 
             if(hasNextFeedPage){
                 _that.nextFeedPage();
@@ -54,7 +54,7 @@ var GetFollowingCollection = function(client, session, eventEmitter, accountId, 
         _that.followingCollection = null;
     };
 
-    console.log("creating my following feed _that.accountId="+_that.accountId);
+    //console.log("creating my following feed _that.accountId="+_that.accountId);
     _that.feed = new client.Feed.AccountFollowing(session, _that.accountId.toString());
 
     _that.nextFeedPage();
