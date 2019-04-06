@@ -1,6 +1,8 @@
-var version = "0.0.6";
+var version = "0.0.7";
 var _scope = this;
-var waitInterval = 0.68;
+var waitInterval = 0.88;
+var isDebug = false;
+var corsURL = "http://instagramprivateapi";
 
 var instaLoginService;
 _scope.instaGetFollowersService = null;
@@ -9,7 +11,21 @@ _scope.getAccountFollowers = null;
 _scope.getFollowingCollection = null;
 
 var currentSession;
-console.log(version);
+var port = 8080;
+console.log(version," port:"+port);
+console.log(version," waitInterval:"+waitInterval);
+const log = require('simple-node-logger').createSimpleLogger('logs/project.log');
+log.info(version," port:"+port);
+
+const opts = {
+    errorEventName:'error',
+    logDirectory:'logs/rolling/', // NOTE: folder must exist and be writable...
+    fileNamePattern:'roll-<DATE>.log',
+    dateFormat:'YYYY.MM.DD'
+};
+
+const rollingLog = require('simple-node-logger').createRollingFileLogger( opts );
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -20,9 +36,16 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 var cors = require('cors');
 
+require('./div0/lib/collections/MapIterator');
+require('./div0/lib/collections/Map');
 var getFollowers = require('./div0/followers/GetAccountFollowers');
 var getFollowingCollection = require('./div0/followers/GetFollowingCollection');
 var massLikingTask = require('./div0/like/MassLikingTask');
+var db = require('./div0/service/LocalDataBase');
+var accounts = require('./div0/accounts/Accounts');
+_scope.userAccount = require('./div0/accounts/UserAccount');
+
+console.log("db:",db);
 
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
@@ -44,22 +67,27 @@ _scope.app.use(express.urlencoded({ extended: false }));
 _scope.app.use(cookieParser());
 _scope.app.use(express.static(path.join(__dirname, 'public')));
 
-_scope.app.use(cors({origin: 'http://instagramprivateapi'}));
+_scope.app.use(cors({origin: corsURL}));
 
 // create services
-//instaLoginService = new loginService.InstaLoginService(_scope.app, eventEmitter);
 _scope.instaGetFollowersService = new getFollowersService.InstaGetFollowersService(_scope.app, eventEmitter);
 _scope.massLikeService = new _massLikeService.InstaMassLikingService(_scope.app, eventEmitter);
+_scope.db = new db.LocalDataBase(_scope.app, eventEmitter);
+_scope.accounts = new accounts.Accounts();
 
+console.log("accounts:",_scope.accounts);
 
 // TODO https://habr.com/post/127525/
-var io = require('socket.io').listen(8080);
+var io = require('socket.io').listen(port);
+
+_scope.currentSocket = null;
+_scope.currentInstaId = -1;
+_scope.userSession = null;
 
 io.sockets.on('connection', function (socket) {
     console.log("on client connected id="+socket.id);
-
+    _scope.currentSocket = socket;
     socket.on('message', function (msg) {
-        //console.log("on message from client: ",msg);
         switch(msg.message.command){
             case "login":
                 _scope.onLoginRequest(msg.message, socket);
@@ -89,11 +117,14 @@ this.onSelfLoginComplete = function(data){
     console.log("onSelfLoginComplete");
 
     var userSession = data.userSession;
+    _scope.userSession = userSession;
 
     selfUser = data.currentUser;
     currentSession = loginUser.getSession();
+    _scope.userSession = currentSession;
     
     if(userSession){
+        _scope.currentInstaId = selfUser.id;
         userSession.send({response:"loginComplete", data:selfUser.id, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
     }
 };
@@ -107,19 +138,72 @@ this.onSelfLoginError = function(data){
         userSession.send({response:"loginError", data:data.error});
     }
 };
-
-this.onFollowingCollectionLoadComplete = function(data){
-    //console.log("onFollowingCollectionLoadComplete  data:",data);
-    var userSession = data.userSession;
-    if(userSession){
-        userSession.send({response:"onFollowingAccountsLoadComplete", data:data.following, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
-    }
-};
+// accounts load
 this.onFollowersLoadComplete = function(data){
     var accountId = data.accountId;
     var accountFollowers = data.followers;
 
+   // console.log("FOLLOWERS:",JSON.stringify(accountFollowers));
+    
+    var i = 0;
+    var totalFollowers = accountFollowers.length;
+    for(i=0; i<totalFollowers; i++){
+        var account = accountFollowers[i];
+        var name = account.name;
+        var description = account.description;
+        var image = account.image;
+
+        var userAccount = new _scope.userAccount.UserAccount(name, image, description, 1, 0);
+        _scope.accounts.add(name, userAccount);
+    }
     _scope.instaGetFollowersService.sendCompleteResponse(accountFollowers);
+};
+
+this.onFollowingCollectionLoadComplete = function(data){
+    var userSession = data.userSession;
+
+    console.log("FOLLOWING:",JSON.stringify(data.following));
+    
+    if(userSession){
+        var i = 0;
+        var totalFollowing= data.following.length;
+        for(i=0; i<totalFollowing; i++){
+            var account = data.following[i];
+            var name = account.name;
+            var description = account.description;
+            var image = account.image;
+
+            var accountExists = _scope.checkAccountExistence(account);
+            
+            if(!accountExists){
+                var userAccount = new _scope.userAccount.UserAccount(name, image, description, 0, 1);
+                _scope.accounts.add(name, userAccount);
+            }
+            else{
+                var existingAccount = _scope.accounts.get(name);
+                existingAccount.setImFollowing(1);
+            }
+        }
+        userSession.send({response:"onFollowingAccountsLoadComplete", data:data.following, image:selfUser.getImage(), name:selfUser.getName(), fullname:selfUser.getFullName(), bio:selfUser.getBio()});
+    }
+    console.log("total accounts loaded ",_scope.accounts.size());
+    var iterator = _scope.accounts.getIterator();
+    
+    while(iterator.hasNext()){
+        var account = iterator.next();
+        console.log("Account: name: "+account.getName()+" | "+account.getDescription()+" follower:"+account.getIsMyFollower()+" imFollowing:"+account.getImFollowing());
+    }
+};
+
+this.onDBConnected = function(){
+    console.log("onDBConnected isDebug=",isDebug);
+    if(isDebug){
+        console.log("adding debug data to DB...");
+        _scope.db.addAccount("3","3","3",0,0);
+    }
+};
+this.checkAccountExistence = function(account){
+    return _scope.accounts.has(account.name);
 };
 
 this.createInterval = function(){
@@ -145,10 +229,10 @@ this.createListeners = function(){
 
     eventEmitter.on("onFollowersLoadComplete", _scope.onFollowersLoadComplete);
     eventEmitter.on("onFollowingCollectionLoadComplete", _scope.onFollowingCollectionLoadComplete);
+    eventEmitter.on("onDBConnected", _scope.onDBConnected);
 };
 
 this.onGetFollowingCollectionRequest = function(socket, accountId){
-    console.log("onGetFollowingCollectionRequest()");
     _scope.getFollowingCollection = new getFollowingCollection.GetFollowingCollection(Client, currentSession, eventEmitter, accountId, socket);
 };
 
@@ -168,9 +252,9 @@ this.onLoginRequest = function(data, socket){
 };
 
 this.onGetFollowersRequest = function(data){
-    //console.log("onGetFollowersRequest data=",data);
     _scope.getAccountFollowers = getFollowers.GetAccountFollowers(Client, currentSession, eventEmitter, data.accountId);
 };
+
 this.onMassLikingRequest = function(data){
     _scope.massLikeTask = massLikingTask.MassLikingTask(Client, currentSession, eventEmitter, data, waitInterval);
 };

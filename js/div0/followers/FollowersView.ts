@@ -17,7 +17,7 @@ class FollowersView{
         }
     }
     protected showCount():void{
-        this.j("#totalFollowingContainer").text("Total followers: "+this.collection.length);
+        this.j("#totalSelfFollowersContainer").text("Followers: "+this.collection.length);
     }
     
     protected createRenderer(parentContainer:any, data:User):void{

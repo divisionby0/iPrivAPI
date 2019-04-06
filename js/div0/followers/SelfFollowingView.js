@@ -14,7 +14,7 @@ var SelfFollowingView = (function (_super) {
         new FollowingAccountListRenderer(parentContainer, data);
     };
     SelfFollowingView.prototype.showCount = function () {
-        this.j("#totalSelfFollowersContainer").text("Total following: " + this.collection.length);
+        this.j("#totalFollowingContainer").text("Following: " + this.collection.length);
     };
     return SelfFollowingView;
 }(FollowersView));

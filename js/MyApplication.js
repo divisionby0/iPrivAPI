@@ -8,16 +8,18 @@
 var MyApplication = (function () {
     function MyApplication() {
         var _this = this;
-        this.version = "0.0.3";
+        this.version = "0.0.4";
+        this.port = "8080";
         this.server = "http://instagramprivateapi:3000";
         this.loginRoute = "/instaLogin";
         this.getFollowersRoute = "/getFollowers";
         this.accountId = 0;
-        this.socketUrl = "http://instagramprivateapi:8080";
+        this.socketUrl = "http://instagramprivateapi:";
         this.manualMassLikeCollection = new Map("colection");
         this.j = jQuery.noConflict();
-        console.log("Im Application ver=", this.version);
-        this.j("#versionContainer").text(this.version);
+        this.socketUrl += this.port;
+        console.log("Im Application ver=", this.version, " socket:", this.socketUrl);
+        this.j("#versionContainer").text(this.version + "  " + this.socketUrl);
         this.createSocketConnection();
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, function (data) { return _this.onAddToLikeCollectionRequest(data); });
     }
@@ -115,6 +117,7 @@ var MyApplication = (function () {
         var getFollowingCollectionButton = this.j("#getFollowingCollectionButton");
         getFollowingCollectionButton.show();
         getFollowingCollectionButton.click(function () { return _this.onGetFollowingCollectionClicked(); });
+        this.onGetSelfFollowersClicked();
     };
     MyApplication.prototype.onGetFollowingCollectionClicked = function () {
         this.socket.send({ 'message': { command: 'getFollowingCollection', id: this.accountId } });
@@ -138,6 +141,9 @@ var MyApplication = (function () {
         this.followersCollection = parser.parse();
         new FollowersView(this.j("#selfFollowers"), this.followersCollection);
         new LikeRequestCollectionListView();
+        this.onGetFollowingCollectionClicked();
+        this.j("#getFollowersButton").hide();
+        this.j("#getFollowingCollectionButton").hide();
     };
     MyApplication.prototype.onGetFollowersError = function (error) {
         console.error("onGetFollowersError:", error);

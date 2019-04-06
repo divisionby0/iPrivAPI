@@ -50,23 +50,23 @@
 
         </div>
         <div class="row" style="width: 200px;">
-            <div id="totalFollowingContainer" style="width: 100%;"></div>
-            <div id="totalSelfFollowersContainer" style="width: 100%;"></div>
+            <!--<div id="totalFollowingContainer" style="width: 100%;"></div>-->
+            <!--<div id="totalSelfFollowersContainer" style="width: 100%;"></div>-->
         </div>
         <div class="row">
             <div class="col-md-4 smallHorizontalPadding">
-                <h2>Followers</h2>
+                <h2 id="totalSelfFollowersContainer">Followers </h2>
                 <div class="followersList" id="selfFollowers"></div>
             </div>
 
             <div class="col-md-4 smallHorizontalPadding">
-                <h2>Following</h2>
+                <h2 id="totalFollowingContainer">Following</h2>
                 <div class="followersList" id="meFollowing"></div>
             </div>
 
             <div class="col-md-4 smallHorizontalPadding" id="addToLikeContainer" style="display: none;">
                 <h2>Mass likes</h2>
-                <div class="row">
+                <div>
                     <div class="col-md-6" id="addToLikeCollectionListHeader"></div>
                     <div class="col-md-6"><button id="createMassLikeRequestButton" class="btn-primary" style="display:none;">Create mass like</button></div>
                     <input id="manualMassLikeInput" type="text" style="width: 80%;">

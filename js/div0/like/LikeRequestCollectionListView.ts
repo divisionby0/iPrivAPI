@@ -28,7 +28,7 @@ class LikeRequestCollectionListView{
 
         this.createMassLikeRequestButton.click(()=>this.onCreateMassLikeButtonClicked());
         this.createMassLikeFromStringRequestButton.click(()=>this.createMassLikeFromStringButtonClicked());
-        
+
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, (data)=>this.onAddToLikeCollectionRequest(data));
     }
 
@@ -54,7 +54,7 @@ class LikeRequestCollectionListView{
 
     private onCreateMassLikeButtonClicked():void {
         var data:any[] = this.buildData();
-        console.log("onCreateMassLikeButtonClicked collection:",data);
+        //console.log("onCreateMassLikeButtonClicked collection:",data);
         EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
     }
     private createMassLikeFromStringButtonClicked():void{

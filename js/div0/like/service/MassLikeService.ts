@@ -9,7 +9,6 @@ class MassLikeService{
     }
 
     public createRequest(collection:any[]):void{
-        console.log("create request collection:",collection);
         this.j.ajax({
             type: "POST",
             url: this.server+this.route,

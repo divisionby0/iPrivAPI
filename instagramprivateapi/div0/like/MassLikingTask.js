@@ -6,11 +6,9 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
 
     _that.accountCounter = -1;
     _that.currentAccount = null;
-    //_that.minutesToWait = 1.5;
     _that.minutesToWait = waitInterval;
 
     var collection = JSON.parse(data.collection);
-    console.log("collection=",collection);
 
     _that.selectedAccountName = "";
 
@@ -33,8 +31,16 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
             console.log("account selected");
             var accountId = account._params.id;
             console.log("ID=",accountId);
+            //console.log("account",account);
+            var accountIsPrivate = account._params.isPrivate;
+            if(accountIsPrivate == true){
+                console.log("Account is private");
+                _that.onAccountComplete();
+            }
+            else{
+                _that.createMediaFeed(accountId);
+            }
 
-            _that.createMediaFeed(accountId);
         }).catch(function(error){
             console.error("Account "+_that.selectedAccountName+" NOT FOUND ",error);
             _that.onAccountComplete();
@@ -172,7 +178,6 @@ var MassLikingTask = function(client, session, eventEmitter, data, waitInterval)
     };
 
     this.createInterval = function(){
-        console.log("_that.minutesToWait="+_that.minutesToWait);
         var msToWait = Math.round(Math.random()*_that.minutesToWait*60*1000);
         return msToWait;
     };

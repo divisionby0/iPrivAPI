@@ -8,8 +8,9 @@
 class MyApplication{
     private j:any;
 
-    private version:string = "0.0.3";
-
+    private version:string = "0.0.4";
+    private port:string = "8080";
+    
     private server:string = "http://instagramprivateapi:3000";
     private loginRoute:string = "/instaLogin";
     private getFollowersRoute:string = "/getFollowers";
@@ -17,7 +18,7 @@ class MyApplication{
 
     private accountId:number = 0;
 
-    private socketUrl:string = "http://instagramprivateapi:8080";
+    private socketUrl:string = "http://instagramprivateapi:";
     private socket:any;
     
     private followersCollection:any[];
@@ -26,8 +27,9 @@ class MyApplication{
     
     constructor(){
         this.j = jQuery.noConflict();
-        console.log("Im Application ver=",this.version);
-        this.j("#versionContainer").text(this.version);
+        this.socketUrl+=this.port;
+        console.log("Im Application ver=",this.version," socket:",this.socketUrl);
+        this.j("#versionContainer").text(this.version+"  "+this.socketUrl);
 
         this.createSocketConnection();
         EventBus.addEventListener(FollowerEvent.ADD_TO_LIKE_COLLECTION, (data)=>this.onAddToLikeCollectionRequest(data));
@@ -131,6 +133,7 @@ class MyApplication{
         this.j("#selfImageContainer").html("<img src='"+message.image+"'/>");
 
         alert("Login to insta complete. Self id="+this.accountId);
+
         this.clearInstaLoginInputs();
         this.hideLoginContainer();
 
@@ -141,6 +144,7 @@ class MyApplication{
         var getFollowingCollectionButton = this.j("#getFollowingCollectionButton");
         getFollowingCollectionButton.show();
         getFollowingCollectionButton.click(()=>this.onGetFollowingCollectionClicked());
+        this.onGetSelfFollowersClicked();
     }
 
     private onGetFollowingCollectionClicked():void{
@@ -169,11 +173,13 @@ class MyApplication{
         
         new FollowersView(this.j("#selfFollowers"), this.followersCollection);
         new LikeRequestCollectionListView();
+        this.onGetFollowingCollectionClicked();
+        this.j("#getFollowersButton").hide();
+        this.j("#getFollowingCollectionButton").hide();
     }
     private onGetFollowersError(error:any):void{
         console.error("onGetFollowersError:",error);
     }
-
 
     private onInstaLoginError(error):void{
         console.error("login error:",error);

@@ -41,7 +41,7 @@ var LikeRequestCollectionListView = (function () {
     };
     LikeRequestCollectionListView.prototype.onCreateMassLikeButtonClicked = function () {
         var data = this.buildData();
-        console.log("onCreateMassLikeButtonClicked collection:", data);
+        //console.log("onCreateMassLikeButtonClicked collection:",data);
         EventBus.dispatchEvent(LikeEvent.MASS_LIKE_REQUEST, data);
     };
     LikeRequestCollectionListView.prototype.createMassLikeFromStringButtonClicked = function () {

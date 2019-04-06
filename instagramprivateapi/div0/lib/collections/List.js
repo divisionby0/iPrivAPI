@@ -1,5 +1,5 @@
 /// <reference path="iterators/ListIterator.ts"/>
-var List = (function () {
+var List = function () {
     function List(id) {
         if (id) {
             this.id = id;
@@ -31,5 +31,5 @@ var List = (function () {
         return this.id;
     };
     return List;
-}());
+};
 module.exports.List = List;

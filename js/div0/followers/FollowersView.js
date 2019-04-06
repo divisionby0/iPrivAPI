@@ -11,7 +11,7 @@ var FollowersView = (function () {
         }
     }
     FollowersView.prototype.showCount = function () {
-        this.j("#totalFollowingContainer").text("Total followers: " + this.collection.length);
+        this.j("#totalSelfFollowersContainer").text("Followers: " + this.collection.length);
     };
     FollowersView.prototype.createRenderer = function (parentContainer, data) {
         new FollowerListRenderer(parentContainer, data);

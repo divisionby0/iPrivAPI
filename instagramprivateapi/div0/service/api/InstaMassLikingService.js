@@ -5,13 +5,11 @@ var InstaMassLikingService = function(app, eventEmitter){
     _that.response = null;
 
     app.post('/massLike', function(req, res) {
-
-        console.log("mass liking request");
+        //console.log("mass liking request");
         _that.request = req;
         _that.response = res;
 
         var collection = req.body.data;
-        console.log("collection :",collection);
 
         eventEmitter.emit("onMassLikingRequest", {collection:collection});
     });

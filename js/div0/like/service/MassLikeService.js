@@ -6,7 +6,6 @@ var MassLikeService = (function () {
     }
     MassLikeService.prototype.createRequest = function (collection) {
         var _this = this;
-        console.log("create request collection:", collection);
         this.j.ajax({
             type: "POST",
             url: this.server + this.route,

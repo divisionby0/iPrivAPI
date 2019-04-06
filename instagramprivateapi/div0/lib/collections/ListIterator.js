@@ -1,4 +1,4 @@
-var ListIterator = (function () {
+var ListIterator = function () {
     function ListIterator(_collection) {
         this.counter = -1;
         this.collection = _collection;
@@ -17,5 +17,5 @@ var ListIterator = (function () {
         return this.collection.get(this.counter);
     };
     return ListIterator;
-}());
+};
 module.exports.ListIterator = ListIterator;

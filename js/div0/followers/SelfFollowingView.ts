@@ -6,6 +6,6 @@ class SelfFollowingView extends FollowersView{
         new FollowingAccountListRenderer(parentContainer, data);
     }
     protected showCount():void{
-        this.j("#totalSelfFollowersContainer").text("Total following: "+this.collection.length);
+        this.j("#totalFollowingContainer").text("Following: "+this.collection.length);
     }
 }

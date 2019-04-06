@@ -1,5 +1,5 @@
 var map = require('./Map');
-var MapJsonDecoder = (function () {
+var MapJsonDecoder = function () {
     function MapJsonDecoder(dataString) {
         this.rootMap = new map.Map('rootMap');
         this.dataString = dataString;
@@ -42,6 +42,5 @@ var MapJsonDecoder = (function () {
         }
         return parentMap;
     };
-    return MapJsonDecoder;
-}());
+};
 module.exports.MapJsonDecoder = MapJsonDecoder;

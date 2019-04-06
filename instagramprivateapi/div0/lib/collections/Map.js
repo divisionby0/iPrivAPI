@@ -1,69 +1,73 @@
-var mapIterator = require('./MapIterator');
-var mapJsonEncoder = require('./MapJsonEncoder');
-var Map = (function () {
-    function Map(id) {
-        this.keys = new Array();
-        if (id) {
-            this.id = id;
-        }
-        this.items = {};
+//var mapIterator = require('./MapIterator');
+//var mapJsonEncoder = require('./MapJsonEncoder');
+var Map = function (id) {
+    var _that = this;
+    _that.keys = new Array();
+    
+    if (id) {
+        _that.id = id;
     }
-    Map.prototype.removeKey = function (key) {
+    _that.items = {};
+
+    var mapIterator = require("./MapIterator");
+    
+    this.removeKey = function(key){
         var index = this.keys.indexOf(key);
-        this.keys.splice(index, 1);
+        _that.keys.splice(index, 1);
     };
-    Map.prototype.add = function (key, value) {
-        var keyExists = this.has(key);
+
+
+    this.add = function (key, value) {
+        var keyExists = _that.has(key);
         if (!keyExists) {
-            this.items[key] = value;
-            this.keys.push(key);
+            _that.items[key] = value;
+            _that.keys.push(key);
         }
         else {
             throw new Error(key + ' already exists');
         }
     };
-    Map.prototype.remove = function (key) {
-        delete this.items[key];
+    this.remove = function (key) {
+        delete _that.items[key];
         // remove key
-        this.removeKey(key);
+        _that.removeKey(key);
     };
-    Map.prototype.update = function (key, newValue) {
-        var value = this.get(key);
+    this.update = function (key, newValue) {
+        var value = _that.get(key);
         if (value != undefined && value != null) {
-            this.items[key] = newValue;
+            _that.items[key] = newValue;
         }
         else {
             console.error('Map error. No such element by key ' + key);
         }
     };
-    Map.prototype.clear = function () {
-        this.keys = new Array();
-        this.items = {};
+    this.clear = function () {
+        _that.keys = new Array();
+        _that.items = {};
     };
-    Map.prototype.has = function (key) {
-        return key in this.items;
+    this.has = function (key) {
+        return key in _that.items;
     };
-    Map.prototype.get = function (key) {
-        return this.items[key];
+    this.get = function (key) {
+        return _that.items[key];
     };
-    Map.prototype.getKeys = function () {
-        return this.keys;
+    this.getKeys = function () {
+        return _that.keys;
     };
-    Map.prototype.size = function () {
-        return this.keys.length;
+    this.size = function () {
+        return _that.keys.length;
     };
-    Map.prototype.getIterator = function () {
+    this.getIterator = function () {
         return new mapIterator.MapIterator(this);
     };
-    Map.prototype.setId = function (id) {
-        this.id = id;
+    this.setId = function (id) {
+        _that.id = id;
     };
-    Map.prototype.getId = function () {
-        return this.id;
+    this.getId = function () {
+        return _that.id;
     };
-    Map.prototype.getEncoder = function () {
-        return new mapJsonEncoder.MapJsonEncoder(this);
+    this.getEncoder = function () {
+        return new mapJsonEncoder.MapJsonEncoder(_that);
     };
-    return Map;
-}());
+};
 module.exports.Map = Map;
